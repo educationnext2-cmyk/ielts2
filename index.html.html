@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IELTS Academy | Your Global Future Starts Here</title>
+    
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- CSS VARIABLES --- */
+        :root {
+            --primary-blue: #0056D2;
+            --dark-blue: #00419e;
+            --text-black: #1f1f1f;
+            --text-gray: #5e5e5e;
+            --bg-light: #f5f7f8;
+            --white: #ffffff;
+            --border: #dcdcdc;
+            --shadow: 0 4px 12px rgba(0,0,0,0.08);
+            --transition: all 0.3s ease;
+        }
+
+        /* --- RESET & GLOBAL --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Source Sans Pro', sans-serif; }
+        body { color: var(--text-black); background-color: var(--white); overflow-x: hidden; line-height: 1.5; scroll-behavior: smooth; }
+        a { text-decoration: none; color: inherit; cursor: pointer; }
+        ul { list-style: none; }
+        button { cursor: pointer; border: none; outline: none; }
+
+        /* --- NAVIGATION --- */
+        header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0.8rem 5%; border-bottom: 1px solid var(--border);
+            position: sticky; top: 0; background: var(--white); z-index: 1000;
+        }
+        .logo { font-size: 1.6rem; font-weight: 700; color: var(--primary-blue); letter-spacing: -1px; }
+        .search-bar { flex: 1; max-width: 450px; margin: 0 2rem; position: relative; }
+        .search-bar input { width: 100%; padding: 0.7rem 1rem; border: 1px solid var(--text-gray); border-radius: 4px; font-size: 0.9rem; }
+        .nav-links { display: flex; gap: 1.8rem; align-items: center; }
+        .nav-links a { font-weight: 400; font-size: 0.95rem; color: var(--text-black); }
+        .nav-links a:hover { color: var(--primary-blue); }
+        .btn-signup { background: var(--primary-blue); color: var(--white) !important; padding: 0.7rem 1.3rem; border-radius: 4px; font-weight: 600; }
+
+        /* --- PAGE ROUTING --- */
+        .page { display: none; min-height: 90vh; }
+        .page.active { display: block; animation: fadeIn 0.4s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- SECTION STYLING --- */
+        section { padding: 5rem 5%; }
+        .section-title { margin-bottom: 3.5rem; text-align: center; }
+        .section-title h2 { font-size: 2.4rem; margin-bottom: 12px; font-weight: 700; }
+        .section-title p { color: var(--text-gray); font-size: 1.15rem; max-width: 700px; margin: 0 auto; }
+
+        /* --- HERO SECTION --- */
+        .hero { display: flex; align-items: center; justify-content: space-between; padding: 5rem 5%; background: var(--white); }
+        .hero-content { flex: 1; max-width: 600px; }
+        .hero-content h1 { font-size: 3.8rem; line-height: 1.05; margin-bottom: 1.5rem; color: var(--text-black); font-weight: 700; }
+        .hero-content p { font-size: 1.25rem; color: var(--text-gray); margin-bottom: 2.5rem; }
+        .hero-image { flex: 1; text-align: right; }
+        .hero-image img { width: 85%; border-radius: 8px; }
+
+        /* --- NEW SECTION 1: TRUSTED PARTNERS --- */
+        .partners { padding: 2rem 5%; border-bottom: 1px solid var(--border); background: #fff; }
+        .partner-flex { display: flex; justify-content: center; align-items: center; gap: 4rem; opacity: 0.6; filter: grayscale(1); flex-wrap: wrap; }
+        .partner-flex span { font-size: 1.5rem; font-weight: 700; color: #888; }
+
+        /* --- NEW SECTION 2: WHY CHOOSE US --- */
+        .usp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; }
+        .usp-card { padding: 2rem; border-radius: 8px; background: #fff; transition: var(--transition); border: 1px solid transparent; }
+        .usp-card:hover { border-color: var(--primary-blue); box-shadow: var(--shadow); }
+        .usp-card h3 { margin-bottom: 1rem; color: var(--primary-blue); }
+
+        /* --- NEW SECTION 3: LEARNING PATH --- */
+        .path-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; position: relative; }
+        .path-step { text-align: center; padding: 1.5rem; position: relative; }
+        .step-num { width: 50px; height: 50px; background: var(--primary-blue); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-weight: 700; font-size: 1.2rem; }
+
+        /* --- NEW SECTION 4: REVIEWS --- */
+        .review-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; }
+        .review-card { padding: 2rem; border-radius: 12px; background: white; box-shadow: var(--shadow); border: 1px solid #eee; }
+        .review-user { display: flex; align-items: center; gap: 1rem; margin-top: 1.5rem; }
+        .review-user img { width: 50px; height: 50px; border-radius: 50%; background: #ddd; }
+
+        /* --- NEW SECTION 5: WALL OF FAME --- */
+        .wall-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1.5rem; text-align: center; }
+        .band-badge { background: #E1F0FF; padding: 2rem 1rem; border-radius: 8px; border: 1px dashed var(--primary-blue); }
+        .band-badge h4 { font-size: 2.5rem; color: var(--primary-blue); }
+
+        /* --- NEW SECTION 6: FAQ --- */
+        .faq-container { max-width: 800px; margin: 0 auto; }
+        details { background: white; margin-bottom: 1rem; padding: 1rem; border-radius: 8px; border: 1px solid var(--border); cursor: pointer; }
+        summary { font-weight: 600; font-size: 1.1rem; }
+        details p { margin-top: 10px; color: var(--text-gray); }
+
+        /* --- EXISTING COURSE GRID --- */
+        .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; }
+        .course-card { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; transition: var(--transition); background: white; }
+        .course-card:hover { transform: translateY(-5px); box-shadow: var(--shadow); }
+        .course-card img { width: 100%; height: 160px; object-fit: cover; }
+        .course-card-body { padding: 1.2rem; }
+        .course-card-body h3 { font-size: 1.1rem; margin: 0.5rem 0; height: 2.5rem; }
+
+        /* --- MODULES PAGE --- */
+        .detail-banner { background: var(--primary-blue); color: white; padding: 4rem 5%; text-align: center; }
+        .detail-container { max-width: 1000px; margin: -50px auto 4rem; background: white; padding: 3rem; border-radius: 12px; box-shadow: var(--shadow); }
+
+        /* --- ADMIN & FORM --- */
+        .enroll-container { background: var(--bg-light); padding: 5rem 5%; }
+        .enroll-card { max-width: 550px; margin: 0 auto; background: white; padding: 3rem; border-radius: 10px; box-shadow: var(--shadow); }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group input, .form-group select { width: 100%; padding: 12px; border: 1px solid #aaa; border-radius: 4px; }
+
+        footer { background: #1f1f1f; color: white; padding: 4rem 5%; text-align: center; }
+
+        @media (max-width: 992px) { .hero-content h1 { font-size: 2.8rem; } .hero-image { display: none; } .search-bar { display: none; } }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo" onclick="showPage('home-page')">IELTS Academy</div>
+        <div class="search-bar"><input type="text" placeholder="What do you want to learn?"></div>
+        <nav class="nav-links">
+            <a onclick="showPage('home-page')">Home</a>
+            <a onclick="showPage('modules-page')">Modules</a>
+            <a onclick="loginAdmin()">Admin</a>
+            <a href="#enroll" onclick="showPage('home-page')" class="btn-signup">Join for Free</a>
+        </nav>
+    </header>
+
+    <!-- PAGE 1: HOME PAGE -->
+    <div id="home-page" class="page active">
+        
+        <!-- Hero -->
+        <section class="hero">
+            <div class="hero-content">
+                <h1>Learn without limits</h1>
+                <p>The world's most trusted IELTS preparation platform. Build skills with courses, certificates, and degrees online from world-class universities and companies.</p>
+                <a href="#enroll" class="btn-signup" style="padding: 1.2rem 2.5rem;">Start Learning Now</a>
+            </div>
+            <div class="hero-image"><img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=800&q=80"></div>
+        </section>
+
+        <!-- New Section 1: Partners -->
+        <div class="partners">
+            <div class="partner-flex">
+                <span>BRITISH COUNCIL</span>
+                <span>IDP IELTS</span>
+                <span>CAMBRIDGE</span>
+                <span>PEARSON</span>
+                <span>OXFORD</span>
+            </div>
+        </div>
+
+        <!-- New Section 2: Why Choose Us -->
+        <section style="background: var(--bg-light);">
+            <div class="section-title">
+                <h2>Why Learn with Academy?</h2>
+                <p>We provide the tools and expertise you need to succeed in the IELTS exam.</p>
+            </div>
+            <div class="usp-grid">
+                <div class="usp-card">
+                    <h3>Ex-Examiner Trainers</h3>
+                    <p>Learn directly from the people who used to grade the exams.</p>
+                </div>
+                <div class="usp-card">
+                    <h3>AI Powered Mock Tests</h3>
+                    <p>Get instant band scores with our advanced AI diagnostic tools.</p>
+                </div>
+                <div class="usp-card">
+                    <h3>Flexible Schedule</h3>
+                    <p>Join live batches or learn at your own pace with recorded sessions.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Existing Modules Grid -->
+        <section>
+            <div class="section-title">
+                <h2>Master the 4 Skills</h2>
+                <p>Specialized training for Listening, Reading, Writing, and Speaking.</p>
+            </div>
+            <div class="grid-4">
+                <div class="course-card" onclick="showPage('modules-page')">
+                    <img src="https://images.unsplash.com/photo-1516116216624-53e697fedbea?auto=format&fit=crop&w=400">
+                    <div class="course-card-body"><h3>Mastering IELTS Listening</h3><p>⭐ 4.9 | Specialization</p></div>
+                </div>
+                <div class="course-card" onclick="showPage('modules-page')">
+                    <img src="https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=400">
+                    <div class="course-card-body"><h3>Strategic Reading Hacks</h3><p>⭐ 4.8 | Course</p></div>
+                </div>
+                <div class="course-card" onclick="showPage('modules-page')">
+                    <img src="https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=400">
+                    <div class="course-card-body"><h3>Writing Task 1 & 2</h3><p>⭐ 4.9 | Certification</p></div>
+                </div>
+                <div class="course-card" onclick="showPage('modules-page')">
+                    <img src="https://images.unsplash.com/photo-1543269664-76bc3997d9ea?auto=format&fit=crop&w=400">
+                    <div class="course-card-body"><h3>Speaking Fluency</h3><p>⭐ 5.0 | Live Training</p></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- New Section 3: Learning Path -->
+        <section style="background: #fff;">
+            <div class="section-title"><h2>Your Path to Success</h2></div>
+            <div class="path-grid">
+                <div class="path-step"><div class="step-num">1</div><h4>Diagnostic Test</h4></div>
+                <div class="path-step"><div class="step-num">2</div><h4>Skill Training</h4></div>
+                <div class="path-step"><div class="step-num">3</div><h4>Full Mock Exams</h4></div>
+                <div class="path-step"><div class="step-num">4</div><h4>Expert Feedback</h4></div>
+                <div class="path-step"><div class="step-num">5</div><h4>Exam Ready</h4></div>
+            </div>
+        </section>
+
+        <!-- New Section 4: Reviews -->
+        <section style="background: var(--bg-light);">
+            <div class="section-title"><h2>What Our Students Say</h2></div>
+            <div class="review-grid">
+                <div class="review-card">
+                    <p>"The writing templates helped me jump from Band 6.0 to 7.5 in just 2 weeks. Simply amazing!"</p>
+                    <div class="review-user">
+                        <img src="https://i.pravatar.cc/100?u=1">
+                        <div><strong>Sarah Ahmed</strong><br><small>Band 8.0 Scorer</small></div>
+                    </div>
+                </div>
+                <div class="review-card">
+                    <p>"Best decision for my immigration journey. The speaking mocks are exactly like the real test."</p>
+                    <div class="review-user">
+                        <img src="https://i.pravatar.cc/100?u=2">
+                        <div><strong>Rahul Verma</strong><br><small>Band 7.5 Scorer</small></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- New Section 5: Wall of Fame -->
+        <section>
+            <div class="section-title"><h2>Recent Band Scorers</h2></div>
+            <div class="wall-grid">
+                <div class="band-badge"><h4>8.5</h4><p>Reading Specialist</p></div>
+                <div class="band-badge"><h4>8.0</h4><p>General Training</p></div>
+                <div class="band-badge"><h4>8.0</h4><p>Academic</p></div>
+                <div class="band-badge"><h4>7.5</h4><p>First Attempt</p></div>
+            </div>
+        </section>
+
+        <!-- New Section 6: FAQ -->
+        <section style="background: var(--bg-light);">
+            <div class="section-title"><h2>Frequently Asked Questions</h2></div>
+            <div class="faq-container">
+                <details><summary>Is the certificate valid globally?</summary><p>Yes, our training follows the official Cambridge guidelines used globally.</p></details>
+                <details><summary>Do you provide study material?</summary><p>We provide latest PDF books, 50+ mock tests, and cue card collections.</p></details>
+                <details><summary>Can I switch batches?</summary><p>Yes, we offer flexible timing for working professionals.</p></details>
+            </div>
+        </section>
+
+        <!-- Enrollment Form -->
+        <section id="enroll" class="enroll-container">
+            <div class="enroll-card">
+                <h2 style="text-align:center; margin-bottom: 2rem;">Apply for Admission</h2>
+                <form id="studentForm">
+                    <div class="form-group"><label>Full Name</label><input type="text" id="name" placeholder="Full Name" required></div>
+                    <div class="form-group"><label>Email</label><input type="email" id="email" placeholder="Email" required></div>
+                    <div class="form-group"><label>Target Band</label><select id="band"><option>Band 7.0</option><option>Band 8.0</option><option>Band 8.5+</option></select></div>
+                    <button type="submit" class="btn-signup" style="width:100%; padding: 1rem;">Submit Application</button>
+                </form>
+                <div id="success" style="display:none; color: green; font-weight:bold; text-align:center; margin-top:1.5rem;">✅ Application Sent Successfully!</div>
+            </div>
+        </section>
+    </div>
+
+    <!-- PAGE 2: MODULES PAGE -->
+    <div id="modules-page" class="page">
+        <div class="detail-banner"><h1>IELTS Curriculum Detail</h1><p>Full focus on high-band scoring criteria.</p></div>
+        <div class="detail-container">
+            <h3>Listening & Reading</h3><p>Master all 40 question types with our secret 'Keyword Mapping' technique.</p><br>
+            <h3>Writing & Speaking</h3><p>Focus on Lexical Resource, Cohesion, and Fluency with live examiners.</p><br>
+            <button onclick="showPage('home-page')" class="btn-signup">Back to Home</button>
+        </div>
+    </div>
+
+    <!-- PAGE 3: ADMIN PAGE -->
+    <div id="admin-page" class="page">
+        <section>
+            <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom:2rem;">
+                <h2>Admin Database</h2><button onclick="fetchStudents()" class="btn-signup" style="background:#28a745;">Refresh</button>
+            </div>
+            <div style="overflow-x:auto; background:white; border:1px solid #ddd;">
+                <table style="width:100%; border-collapse:collapse; min-width:600px;">
+                    <thead style="background:#f4f4f4;"><tr><th style="padding:15px; border:1px solid #ddd;">Name</th><th style="padding:15px; border:1px solid #ddd;">Email</th><th style="padding:15px; border:1px solid #ddd;">Band</th></tr></thead>
+                    <tbody id="dataTable"></tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <p>IELTS Academy © 2024. Project ID: pfmyuysdbauhtpbrvlvz</p>
+    </footer>
+
+    <script>
+        const SB_URL = 'https://pfmyuysdbauhtpbrvlvz.supabase.co';
+        const SB_KEY = 'sb_publishable_dlYhnXIglaIPbf-X47deZg_NKfqs56Y';
+        const _supabase = supabase.createClient(SB_URL, SB_KEY);
+
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            window.scrollTo(0,0);
+        }
+
+        function loginAdmin() {
+            if(prompt("Admin Password:") === "admin123") { showPage('admin-page'); fetchStudents(); }
+            else { alert("Wrong password!"); }
+        }
+
+        document.getElementById('studentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const { error } = await _supabase.from('students').insert([{ 
+                name: document.getElementById('name').value, 
+                email: document.getElementById('email').value, 
+                target_band: document.getElementById('band').value 
+            }]);
+            if(error) alert("Error: " + error.message);
+            else { 
+                document.getElementById('studentForm').reset();
+                document.getElementById('success').style.display = 'block';
+            }
+        });
+
+        async function fetchStudents() {
+            const { data, error } = await _supabase.from('students').select('*').order('id', { ascending: false });
+            const body = document.getElementById('dataTable');
+            body.innerHTML = '';
+            if(!error) data.forEach(s => {
+                body.innerHTML += `<tr><td style="padding:10px; border:1px solid #ddd;">${s.name}</td><td style="padding:10px; border:1px solid #ddd;">${s.email}</td><td style="padding:10px; border:1px solid #ddd;">${s.target_band}</td></tr>`;
+            });
+        }
+    </script>
+</body>
+</html>
