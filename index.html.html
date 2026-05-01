@@ -1,345 +1,698 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IELTS Academy | Your Global Future Starts Here</title>
+    <title>Education Next | Global Education Partner</title>
     
-    <!-- Supabase SDK -->
+    <!-- SDKs & Fonts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        /* --- CSS VARIABLES --- */
+        /* --- THEME SYSTEM --- */
         :root {
-            --primary-blue: #0056D2;
-            --dark-blue: #00419e;
-            --text-black: #1f1f1f;
-            --text-gray: #5e5e5e;
-            --bg-light: #f5f7f8;
-            --white: #ffffff;
-            --border: #dcdcdc;
-            --shadow: 0 4px 12px rgba(0,0,0,0.08);
-            --transition: all 0.3s ease;
+            --primary: #ff3b3b;
+            --bg-body: #ffffff;
+            --bg-card: #f9fbff;
+            --text-main: #121212;
+            --text-muted: #5e5e5e;
+            --border: #e1e8f0;
+            --nav-bg: rgba(255, 255, 255, 0.9);
+            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* --- RESET & GLOBAL --- */
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Source Sans Pro', sans-serif; }
-        body { color: var(--text-black); background-color: var(--white); overflow-x: hidden; line-height: 1.5; scroll-behavior: smooth; }
-        a { text-decoration: none; color: inherit; cursor: pointer; }
-        ul { list-style: none; }
-        button { cursor: pointer; border: none; outline: none; }
+        [data-theme="dark"] {
+            --bg-body: #0a0a0a;
+            --bg-card: #141414;
+            --text-main: #ffffff;
+            --text-muted: #aaaaaa;
+            --border: #222222;
+            --nav-bg: rgba(10, 10, 10, 0.9);
+        }
+
+        /* --- GLOBAL --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background-color: var(--bg-body); color: var(--text-main); transition: background-color 0.5s ease; overflow-x: hidden; scroll-behavior: smooth; }
+        
+        .reveal { opacity: 0; transform: translateY(30px); transition: var(--transition); }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+        
+        button, .btn { cursor: pointer; border: none; outline: none; border-radius: 50px; font-weight: 700; transition: var(--transition); }
+        .btn-red { background: var(--primary); color: #fff; padding: 12px 28px; text-decoration: none; display: inline-block; }
+        .btn-red:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(255, 59, 59, 0.3); }
+
+        /* --- SOCIAL SIDEBAR --- */
+        .social-sidebar { position: fixed; left: 20px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 15px; z-index: 1000; }
+        .social-sidebar a { width: 45px; height: 45px; background: #1a1a1a; color: white; display: flex; align-items: center; justify-content: center; border-radius: 12px; border: 1px solid #333; }
+        .social-sidebar a:hover { background: var(--primary); transform: translateX(5px); }
 
         /* --- NAVIGATION --- */
-        header {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 0.8rem 5%; border-bottom: 1px solid var(--border);
-            position: sticky; top: 0; background: var(--white); z-index: 1000;
+        header { display: flex; align-items: center; justify-content: space-between; padding: 1rem 6%; position: sticky; top: 0; background: var(--nav-bg); backdrop-filter: blur(15px); z-index: 1100; border-bottom: 1px solid var(--border); }
+        .logo { font-size: 1.5rem; font-weight: 800; color: var(--text-main); }
+        .logo span { color: var(--primary); }
+        .nav-links { display: flex; gap: 2rem; align-items: center; }
+        .nav-links a { color: var(--text-main); text-decoration: none; font-weight: 600; font-size: 0.9rem; cursor: pointer; }
+        .theme-toggle { font-size: 1.2rem; cursor: pointer; }
+
+        /* --- PAGE SYSTEM --- */
+        .page { display: none; padding-top: 20px; min-height: 100vh; }
+        .page.active { display: block; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* --- UI COMPONENTS --- */
+        section { padding: 80px 8%; }
+        .tag-red { background: rgba(255, 59, 59, 0.1); color: var(--primary); padding: 5px 15px; border-radius: 50px; font-size: 0.75rem; font-weight: 800; border: 1px solid var(--primary); margin-bottom: 15px; display: inline-block; }
+        .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 30px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+        .card { background: var(--bg-card); padding: 40px; border-radius: 30px; border: 1px solid var(--border); transition: 0.3s; position: relative; }
+        .card:hover { border-color: var(--primary); transform: translateY(-10px); }
+
+        /* --- MOCK TEST ELEMENTS --- */
+        .mock-hero { text-align: center; background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=1200'); background-size: cover; padding: 120px 8%; color: white; border-radius: 40px; margin: 0 4%; }
+        .graded-badge { background: #7C3AED; color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.7rem; font-weight: 800; position: absolute; top: 20px; right: 20px; }
+
+        /* --- MODAL --- */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(10px); }
+        .modal-content { background: var(--bg-body); width: 95%; max-width: 600px; padding: 40px; border-radius: 30px; }
+        input, select, textarea { width: 100%; padding: 15px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; color: var(--text-main); margin-bottom: 15px; }
+
+        footer { background: #000; color: #fff; padding: 60px 8%; border-top: 1px solid var(--border); }
+        footer a { color: #ccc; text-decoration: none; }
+        footer a:hover { color: var(--primary); }
+
+        /* --- STATISTICS & COUNTER --- */
+        .stat-number { font-size: 3rem; font-weight: 800; color: var(--primary); }
+        .stat-label { font-size: 1rem; color: var(--text-muted); }
+
+        /* --- FAQ ACCORDION --- */
+        .faq-item { background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; margin-bottom: 15px; padding: 20px; transition: 0.3s; }
+        .faq-question { font-weight: 700; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; color: var(--text-muted); }
+        .faq-item.open .faq-answer { max-height: 200px; padding-top: 15px; }
+        .faq-item.open .faq-question i { transform: rotate(45deg); }
+        .faq-question i { transition: transform 0.3s ease; }
+
+        /* --- TIMELINE --- */
+        .timeline { position: relative; padding-left: 50px; }
+        .timeline::before { content: ''; position: absolute; left: 25px; top: 0; bottom: 0; width: 2px; background: var(--primary); }
+        .timeline-item { position: relative; margin-bottom: 40px; }
+        .timeline-item::before { content: ''; position: absolute; left: -37px; top: 5px; width: 16px; height: 16px; border-radius: 50%; background: var(--primary); border: 3px solid var(--bg-body); }
+
+        /* --- CTA BANNER --- */
+        .cta-banner { background: linear-gradient(135deg, var(--primary), #ff6b6b); padding: 60px 8%; border-radius: 40px; margin: 0 4%; text-align: center; color: white; }
+
+        /* AI score box */
+        .score-badge { background: var(--primary); color: white; display: inline-block; padding: 5px 20px; border-radius: 20px; font-weight: 800; font-size: 1.2rem; margin: 10px 0; }
+
+        @media (max-width: 992px) {
+            .nav-links, .social-sidebar { display: none; }
+            section { padding: 40px 5%; }
+            .mock-hero { padding: 60px 5%; }
+            .grid-2 { grid-template-columns: 1fr; }
+            .timeline { padding-left: 30px; }
         }
-        .logo { font-size: 1.6rem; font-weight: 700; color: var(--primary-blue); letter-spacing: -1px; }
-        .search-bar { flex: 1; max-width: 450px; margin: 0 2rem; position: relative; }
-        .search-bar input { width: 100%; padding: 0.7rem 1rem; border: 1px solid var(--text-gray); border-radius: 4px; font-size: 0.9rem; }
-        .nav-links { display: flex; gap: 1.8rem; align-items: center; }
-        .nav-links a { font-weight: 400; font-size: 0.95rem; color: var(--text-black); }
-        .nav-links a:hover { color: var(--primary-blue); }
-        .btn-signup { background: var(--primary-blue); color: var(--white) !important; padding: 0.7rem 1.3rem; border-radius: 4px; font-weight: 600; }
-
-        /* --- PAGE ROUTING --- */
-        .page { display: none; min-height: 90vh; }
-        .page.active { display: block; animation: fadeIn 0.4s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* --- SECTION STYLING --- */
-        section { padding: 5rem 5%; }
-        .section-title { margin-bottom: 3.5rem; text-align: center; }
-        .section-title h2 { font-size: 2.4rem; margin-bottom: 12px; font-weight: 700; }
-        .section-title p { color: var(--text-gray); font-size: 1.15rem; max-width: 700px; margin: 0 auto; }
-
-        /* --- HERO SECTION --- */
-        .hero { display: flex; align-items: center; justify-content: space-between; padding: 5rem 5%; background: var(--white); }
-        .hero-content { flex: 1; max-width: 600px; }
-        .hero-content h1 { font-size: 3.8rem; line-height: 1.05; margin-bottom: 1.5rem; color: var(--text-black); font-weight: 700; }
-        .hero-content p { font-size: 1.25rem; color: var(--text-gray); margin-bottom: 2.5rem; }
-        .hero-image { flex: 1; text-align: right; }
-        .hero-image img { width: 85%; border-radius: 8px; }
-
-        /* --- NEW SECTION 1: TRUSTED PARTNERS --- */
-        .partners { padding: 2rem 5%; border-bottom: 1px solid var(--border); background: #fff; }
-        .partner-flex { display: flex; justify-content: center; align-items: center; gap: 4rem; opacity: 0.6; filter: grayscale(1); flex-wrap: wrap; }
-        .partner-flex span { font-size: 1.5rem; font-weight: 700; color: #888; }
-
-        /* --- NEW SECTION 2: WHY CHOOSE US --- */
-        .usp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; }
-        .usp-card { padding: 2rem; border-radius: 8px; background: #fff; transition: var(--transition); border: 1px solid transparent; }
-        .usp-card:hover { border-color: var(--primary-blue); box-shadow: var(--shadow); }
-        .usp-card h3 { margin-bottom: 1rem; color: var(--primary-blue); }
-
-        /* --- NEW SECTION 3: LEARNING PATH --- */
-        .path-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; position: relative; }
-        .path-step { text-align: center; padding: 1.5rem; position: relative; }
-        .step-num { width: 50px; height: 50px; background: var(--primary-blue); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-weight: 700; font-size: 1.2rem; }
-
-        /* --- NEW SECTION 4: REVIEWS --- */
-        .review-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; }
-        .review-card { padding: 2rem; border-radius: 12px; background: white; box-shadow: var(--shadow); border: 1px solid #eee; }
-        .review-user { display: flex; align-items: center; gap: 1rem; margin-top: 1.5rem; }
-        .review-user img { width: 50px; height: 50px; border-radius: 50%; background: #ddd; }
-
-        /* --- NEW SECTION 5: WALL OF FAME --- */
-        .wall-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1.5rem; text-align: center; }
-        .band-badge { background: #E1F0FF; padding: 2rem 1rem; border-radius: 8px; border: 1px dashed var(--primary-blue); }
-        .band-badge h4 { font-size: 2.5rem; color: var(--primary-blue); }
-
-        /* --- NEW SECTION 6: FAQ --- */
-        .faq-container { max-width: 800px; margin: 0 auto; }
-        details { background: white; margin-bottom: 1rem; padding: 1rem; border-radius: 8px; border: 1px solid var(--border); cursor: pointer; }
-        summary { font-weight: 600; font-size: 1.1rem; }
-        details p { margin-top: 10px; color: var(--text-gray); }
-
-        /* --- EXISTING COURSE GRID --- */
-        .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; }
-        .course-card { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; transition: var(--transition); background: white; }
-        .course-card:hover { transform: translateY(-5px); box-shadow: var(--shadow); }
-        .course-card img { width: 100%; height: 160px; object-fit: cover; }
-        .course-card-body { padding: 1.2rem; }
-        .course-card-body h3 { font-size: 1.1rem; margin: 0.5rem 0; height: 2.5rem; }
-
-        /* --- MODULES PAGE --- */
-        .detail-banner { background: var(--primary-blue); color: white; padding: 4rem 5%; text-align: center; }
-        .detail-container { max-width: 1000px; margin: -50px auto 4rem; background: white; padding: 3rem; border-radius: 12px; box-shadow: var(--shadow); }
-
-        /* --- ADMIN & FORM --- */
-        .enroll-container { background: var(--bg-light); padding: 5rem 5%; }
-        .enroll-card { max-width: 550px; margin: 0 auto; background: white; padding: 3rem; border-radius: 10px; box-shadow: var(--shadow); }
-        .form-group { margin-bottom: 1.5rem; }
-        .form-group input, .form-group select { width: 100%; padding: 12px; border: 1px solid #aaa; border-radius: 4px; }
-
-        footer { background: #1f1f1f; color: white; padding: 4rem 5%; text-align: center; }
-
-        @media (max-width: 992px) { .hero-content h1 { font-size: 2.8rem; } .hero-image { display: none; } .search-bar { display: none; } }
     </style>
 </head>
 <body>
 
+    <div class="social-sidebar">
+        <a href="#"><i class="fab fa-facebook-f"></i></a>
+        <a href="#"><i class="fab fa-tiktok"></i></a>
+        <a href="#"><i class="fab fa-youtube"></i></a>
+        <a href="#"><i class="fab fa-whatsapp"></i></a>
+    </div>
+
     <header>
-        <div class="logo" onclick="showPage('home-page')">IELTS Academy</div>
-        <div class="search-bar"><input type="text" placeholder="What do you want to learn?"></div>
+        <div class="logo">Education <span>Next</span></div>
         <nav class="nav-links">
-            <a onclick="showPage('home-page')">Home</a>
-            <a onclick="showPage('modules-page')">Modules</a>
-            <a onclick="loginAdmin()">Admin</a>
-            <a href="#enroll" onclick="showPage('home-page')" class="btn-signup">Join for Free</a>
+            <a onclick="showPage('home')">Home</a>
+            <a onclick="showPage('about')">About Us</a>
+            <a onclick="showPage('courses')">Courses</a>
+            <a onclick="showPage('mock')">Mock Tests</a>
+            <a onclick="showPage('contact')">Contact</a>
+            <a onclick="showAdmin()">Admin</a>
         </nav>
+        <div style="display: flex; gap: 20px; align-items: center;">
+            <div class="theme-toggle" onclick="toggleTheme()"><i class="fas fa-moon"></i></div>
+            <button class="btn-red" onclick="openModal()">Enroll Now</button>
+        </div>
     </header>
 
-    <!-- PAGE 1: HOME PAGE -->
-    <div id="home-page" class="page active">
-        
-        <!-- Hero -->
-        <section class="hero">
-            <div class="hero-content">
-                <h1>Learn without limits</h1>
-                <p>The world's most trusted IELTS preparation platform. Build skills with courses, certificates, and degrees online from world-class universities and companies.</p>
-                <a href="#enroll" class="btn-signup" style="padding: 1.2rem 2.5rem;">Start Learning Now</a>
+    <!-- ========== PAGE 1: LANDING PAGE ========== -->
+    <main id="home" class="page active">
+        <!-- 1. Hero -->
+        <section class="reveal" style="display: flex; align-items: center; gap: 50px;">
+            <div style="flex: 1.2;">
+                <span class="tag-red">🌟 Transforming Dreams Since 2015</span>
+                <h1 style="font-size: 4rem; line-height: 1.1; margin-bottom: 20px;">Your Trusted Partner in <span>Global Education</span></h1>
+                <p style="color: var(--text-muted); font-size: 1.2rem; margin-bottom: 30px;">Transforming dreams into reality with expert consultancy and AI-powered IELTS preparation.</p>
+                <button class="btn-red" onclick="openModal()">Get Started Today <i class="fas fa-arrow-right"></i></button>
             </div>
-            <div class="hero-image"><img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=800&q=80"></div>
+            <div style="flex: 1;"><img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800" style="width:100%; border-radius: 40px;"></div>
         </section>
 
-        <!-- New Section 1: Partners -->
-        <div class="partners">
-            <div class="partner-flex">
-                <span>BRITISH COUNCIL</span>
-                <span>IDP IELTS</span>
-                <span>CAMBRIDGE</span>
-                <span>PEARSON</span>
-                <span>OXFORD</span>
-            </div>
-        </div>
-
-        <!-- New Section 2: Why Choose Us -->
-        <section style="background: var(--bg-light);">
-            <div class="section-title">
-                <h2>Why Learn with Academy?</h2>
-                <p>We provide the tools and expertise you need to succeed in the IELTS exam.</p>
-            </div>
-            <div class="usp-grid">
-                <div class="usp-card">
-                    <h3>Ex-Examiner Trainers</h3>
-                    <p>Learn directly from the people who used to grade the exams.</p>
-                </div>
-                <div class="usp-card">
-                    <h3>AI Powered Mock Tests</h3>
-                    <p>Get instant band scores with our advanced AI diagnostic tools.</p>
-                </div>
-                <div class="usp-card">
-                    <h3>Flexible Schedule</h3>
-                    <p>Join live batches or learn at your own pace with recorded sessions.</p>
-                </div>
+        <!-- 2. Why Choose Us (Counters) -->
+        <section class="reveal" style="background: var(--bg-card);">
+            <div style="text-align: center; margin-bottom: 50px;"><span class="tag-red">Why Us</span><h2>Numbers <span>Speak</span></h2></div>
+            <div class="grid-3" style="text-align: center;">
+                <div class="card"><div class="stat-number counter" data-target="5000">0</div><div class="stat-label">Students Placed</div></div>
+                <div class="card"><div class="stat-number counter" data-target="98">0</div><div class="stat-label">% Visa Success</div></div>
+                <div class="card"><div class="stat-number counter" data-target="50">0</div><div class="stat-label">Partner Universities</div></div>
             </div>
         </section>
 
-        <!-- Existing Modules Grid -->
-        <section>
-            <div class="section-title">
-                <h2>Master the 4 Skills</h2>
-                <p>Specialized training for Listening, Reading, Writing, and Speaking.</p>
+        <!-- 3. Programs Summary -->
+        <section class="reveal">
+            <div style="text-align: center; margin-bottom: 50px;"><h2>Language <span>Proficiency</span></h2></div>
+            <div class="grid-3">
+                <div class="card" style="text-align: center;">
+                    <i class="fas fa-book" style="font-size: 3rem; color: var(--primary); margin-bottom: 20px; display: block;"></i>
+                    <h3>IELTS</h3><p>Score: 6.0 - 9.0</p>
+                    <button class="btn-red" style="margin-top: 20px; background: transparent; border: 1px solid var(--primary); color: var(--primary);" onclick="showPage('mock')">Free Mock Test</button>
+                </div>
+                <div class="card" style="text-align: center;">
+                    <i class="fas fa-feather" style="font-size: 3rem; color: var(--primary); margin-bottom: 20px; display: block;"></i>
+                    <h3>Duolingo</h3><p>Score: 10 - 160</p>
+                    <button class="btn-red" style="margin-top: 20px; background: transparent; border: 1px solid var(--primary); color: var(--primary);">Practice Now</button>
+                </div>
+                <div class="card" style="text-align: center;">
+                    <i class="fas fa-laptop" style="font-size: 3rem; color: var(--primary); margin-bottom: 20px; display: block;"></i>
+                    <h3>PTE</h3><p>Score: 10 - 90</p>
+                    <button class="btn-red" style="margin-top: 20px; background: transparent; border: 1px solid var(--primary); color: var(--primary);">Practice Now</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. Partner Universities -->
+        <section class="reveal">
+            <div style="text-align: center; margin-bottom: 50px;">
+                <span class="tag-red">Global Partners</span><h2>Top Partner <span>Universities</span></h2>
             </div>
             <div class="grid-4">
-                <div class="course-card" onclick="showPage('modules-page')">
-                    <img src="https://images.unsplash.com/photo-1516116216624-53e697fedbea?auto=format&fit=crop&w=400">
-                    <div class="course-card-body"><h3>Mastering IELTS Listening</h3><p>⭐ 4.9 | Specialization</p></div>
+                <div class="card" style="text-align: center; padding: 30px;">
+                    <img src="https://upload.wikimedia.org/wikipedia/en/thumb/2/29/Harvard_shield_wreath.svg/1200px-Harvard_shield_wreath.svg.png" style="height: 60px; margin-bottom: 15px;">
+                    <h4>Harvard University</h4>
+                    <p style="color: var(--text-muted);">USA</p>
                 </div>
-                <div class="course-card" onclick="showPage('modules-page')">
-                    <img src="https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=400">
-                    <div class="course-card-body"><h3>Strategic Reading Hacks</h3><p>⭐ 4.8 | Course</p></div>
+                <div class="card" style="text-align: center; padding: 30px;">
+                    <img src="https://upload.wikimedia.org/wikipedia/en/thumb/8/8f/Oxford_University_Coat_Of_Arms_%28Red_Background%29.svg/1200px-Oxford_University_Coat_Of_Arms_%28Red_Background%29.svg.png" style="height: 60px; margin-bottom: 15px;">
+                    <h4>University of Oxford</h4>
+                    <p style="color: var(--text-muted);">UK</p>
                 </div>
-                <div class="course-card" onclick="showPage('modules-page')">
-                    <img src="https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=400">
-                    <div class="course-card-body"><h3>Writing Task 1 & 2</h3><p>⭐ 4.9 | Certification</p></div>
+                <div class="card" style="text-align: center; padding: 30px;">
+                    <img src="https://upload.wikimedia.org/wikipedia/en/thumb/e/e5/Stanford_University_seal_2003.svg/1200px-Stanford_University_seal_2003.svg.png" style="height: 60px; margin-bottom: 15px;">
+                    <h4>Stanford University</h4>
+                    <p style="color: var(--text-muted);">USA</p>
                 </div>
-                <div class="course-card" onclick="showPage('modules-page')">
-                    <img src="https://images.unsplash.com/photo-1543269664-76bc3997d9ea?auto=format&fit=crop&w=400">
-                    <div class="course-card-body"><h3>Speaking Fluency</h3><p>⭐ 5.0 | Live Training</p></div>
+                <div class="card" style="text-align: center; padding: 30px;">
+                    <img src="https://upload.wikimedia.org/wikipedia/en/thumb/b/b7/University_of_Toronto_Logo.svg/1200px-University_of_Toronto_Logo.svg.png" style="height: 60px; margin-bottom: 15px;">
+                    <h4>University of Toronto</h4>
+                    <p style="color: var(--text-muted);">Canada</p>
                 </div>
             </div>
         </section>
 
-        <!-- New Section 3: Learning Path -->
-        <section style="background: #fff;">
-            <div class="section-title"><h2>Your Path to Success</h2></div>
-            <div class="path-grid">
-                <div class="path-step"><div class="step-num">1</div><h4>Diagnostic Test</h4></div>
-                <div class="path-step"><div class="step-num">2</div><h4>Skill Training</h4></div>
-                <div class="path-step"><div class="step-num">3</div><h4>Full Mock Exams</h4></div>
-                <div class="path-step"><div class="step-num">4</div><h4>Expert Feedback</h4></div>
-                <div class="path-step"><div class="step-num">5</div><h4>Exam Ready</h4></div>
+        <!-- 5. Upcoming Events -->
+        <section class="reveal" style="background: var(--bg-card);">
+            <div style="text-align: center; margin-bottom: 50px;">
+                <span class="tag-red">Stay Informed</span><h2>Upcoming <span>Events</span></h2>
             </div>
-        </section>
-
-        <!-- New Section 4: Reviews -->
-        <section style="background: var(--bg-light);">
-            <div class="section-title"><h2>What Our Students Say</h2></div>
-            <div class="review-grid">
-                <div class="review-card">
-                    <p>"The writing templates helped me jump from Band 6.0 to 7.5 in just 2 weeks. Simply amazing!"</p>
-                    <div class="review-user">
-                        <img src="https://i.pravatar.cc/100?u=1">
-                        <div><strong>Sarah Ahmed</strong><br><small>Band 8.0 Scorer</small></div>
+            <div class="grid-2">
+                <div class="card" style="display: flex; gap: 20px; align-items: center;">
+                    <div style="background: var(--primary); color: white; padding: 20px; border-radius: 20px; text-align: center; min-width: 80px;">
+                        <div style="font-size: 2rem; font-weight: 800;">25</div>
+                        <div>OCT</div>
+                    </div>
+                    <div>
+                        <h4>IELTS Masterclass</h4>
+                        <p style="color: var(--text-muted);">Free online workshop covering all four modules.</p>
+                        <small>7:00 PM PKT | Zoom</small>
                     </div>
                 </div>
-                <div class="review-card">
-                    <p>"Best decision for my immigration journey. The speaking mocks are exactly like the real test."</p>
-                    <div class="review-user">
-                        <img src="https://i.pravatar.cc/100?u=2">
-                        <div><strong>Rahul Verma</strong><br><small>Band 7.5 Scorer</small></div>
+                <div class="card" style="display: flex; gap: 20px; align-items: center;">
+                    <div style="background: var(--primary); color: white; padding: 20px; border-radius: 20px; text-align: center; min-width: 80px;">
+                        <div style="font-size: 2rem; font-weight: 800;">30</div>
+                        <div>OCT</div>
+                    </div>
+                    <div>
+                        <h4>Visa Guidance Session</h4>
+                        <p style="color: var(--text-muted);">Expert tips on study visas for USA, UK, and Canada.</p>
+                        <small>5:00 PM PKT | In‑Office</small>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- New Section 5: Wall of Fame -->
-        <section>
-            <div class="section-title"><h2>Recent Band Scorers</h2></div>
-            <div class="wall-grid">
-                <div class="band-badge"><h4>8.5</h4><p>Reading Specialist</p></div>
-                <div class="band-badge"><h4>8.0</h4><p>General Training</p></div>
-                <div class="band-badge"><h4>8.0</h4><p>Academic</p></div>
-                <div class="band-badge"><h4>7.5</h4><p>First Attempt</p></div>
+        <!-- 6. FAQ Section -->
+        <section class="reveal">
+            <div style="text-align: center; margin-bottom: 50px;">
+                <span class="tag-red">FAQ</span><h2>Frequently <span>Asked Questions</span></h2>
+            </div>
+            <div style="max-width: 800px; margin: 0 auto;">
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)"><span>How long does it take to prepare for IELTS?</span><i class="fas fa-plus"></i></div>
+                    <div class="faq-answer">Typically 6-12 weeks with our structured program. Many students achieve their target band within 8 weeks.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)"><span>Do you offer online classes?</span><i class="fas fa-plus"></i></div>
+                    <div class="faq-answer">Yes, we offer live online classes, recorded lectures, and a fully online mock test portal.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)"><span>What is your visa success rate?</span><i class="fas fa-plus"></i></div>
+                    <div class="faq-answer">We maintain a 98% visa success rate across all countries.</div>
+                </div>
             </div>
         </section>
 
-        <!-- New Section 6: FAQ -->
-        <section style="background: var(--bg-light);">
-            <div class="section-title"><h2>Frequently Asked Questions</h2></div>
-            <div class="faq-container">
-                <details><summary>Is the certificate valid globally?</summary><p>Yes, our training follows the official Cambridge guidelines used globally.</p></details>
-                <details><summary>Do you provide study material?</summary><p>We provide latest PDF books, 50+ mock tests, and cue card collections.</p></details>
-                <details><summary>Can I switch batches?</summary><p>Yes, we offer flexible timing for working professionals.</p></details>
-            </div>
-        </section>
-
-        <!-- Enrollment Form -->
-        <section id="enroll" class="enroll-container">
-            <div class="enroll-card">
-                <h2 style="text-align:center; margin-bottom: 2rem;">Apply for Admission</h2>
-                <form id="studentForm">
-                    <div class="form-group"><label>Full Name</label><input type="text" id="name" placeholder="Full Name" required></div>
-                    <div class="form-group"><label>Email</label><input type="email" id="email" placeholder="Email" required></div>
-                    <div class="form-group"><label>Target Band</label><select id="band"><option>Band 7.0</option><option>Band 8.0</option><option>Band 8.5+</option></select></div>
-                    <button type="submit" class="btn-signup" style="width:100%; padding: 1rem;">Submit Application</button>
-                </form>
-                <div id="success" style="display:none; color: green; font-weight:bold; text-align:center; margin-top:1.5rem;">✅ Application Sent Successfully!</div>
-            </div>
-        </section>
-    </div>
-
-    <!-- PAGE 2: MODULES PAGE -->
-    <div id="modules-page" class="page">
-        <div class="detail-banner"><h1>IELTS Curriculum Detail</h1><p>Full focus on high-band scoring criteria.</p></div>
-        <div class="detail-container">
-            <h3>Listening & Reading</h3><p>Master all 40 question types with our secret 'Keyword Mapping' technique.</p><br>
-            <h3>Writing & Speaking</h3><p>Focus on Lexical Resource, Cohesion, and Fluency with live examiners.</p><br>
-            <button onclick="showPage('home-page')" class="btn-signup">Back to Home</button>
+        <!-- 7. CTA Banner -->
+        <div class="cta-banner reveal">
+            <h2 style="font-size: 2.5rem; margin-bottom: 20px;">Ready to Start Your Journey?</h2>
+            <p style="font-size: 1.1rem; margin-bottom: 30px;">Join 5000+ students who have achieved their dream band with Education Next.</p>
+            <button class="btn-red" style="background: white; color: var(--primary); font-size: 1.2rem; padding: 15px 40px;" onclick="openModal()">Enroll Now</button>
         </div>
-    </div>
 
-    <!-- PAGE 3: ADMIN PAGE -->
-    <div id="admin-page" class="page">
-        <section>
-            <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom:2rem;">
-                <h2>Admin Database</h2><button onclick="fetchStudents()" class="btn-signup" style="background:#28a745;">Refresh</button>
-            </div>
-            <div style="overflow-x:auto; background:white; border:1px solid #ddd;">
-                <table style="width:100%; border-collapse:collapse; min-width:600px;">
-                    <thead style="background:#f4f4f4;"><tr><th style="padding:15px; border:1px solid #ddd;">Name</th><th style="padding:15px; border:1px solid #ddd;">Email</th><th style="padding:15px; border:1px solid #ddd;">Band</th></tr></thead>
-                    <tbody id="dataTable"></tbody>
-                </table>
+        <!-- 8. Success Stories -->
+        <section class="reveal">
+            <div style="text-align: center; margin-bottom: 50px;"><h2>Success <span>Stories</span></h2></div>
+            <div class="grid-3">
+                <div class="card" style="padding: 0; overflow: hidden; border-bottom: 5px solid var(--primary);">
+                    <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400" style="width: 100%;">
+                    <div style="padding: 20px;"><h4>Komail Khan</h4><p>University of Auckland, NZ</p></div>
+                </div>
+                <div class="card" style="padding: 0; overflow: hidden; border-bottom: 5px solid var(--primary);">
+                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400" style="width: 100%;">
+                    <div style="padding: 20px;"><h4>Ayesha Ali</h4><p>University of Toronto, Canada</p></div>
+                </div>
+                <div class="card" style="padding: 0; overflow: hidden; border-bottom: 5px solid var(--primary);">
+                    <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400" style="width: 100%;">
+                    <div style="padding: 20px;"><h4>Hamza Tariq</h4><p>University of Melbourne, Australia</p></div>
+                </div>
             </div>
         </section>
+
+        <!-- 9. Newsletter -->
+        <section class="reveal">
+            <div style="background: var(--bg-card); padding: 30px; border-radius: 30px; border: 1px solid var(--border); max-width: 600px; margin: 0 auto; text-align: center;">
+                <i class="fas fa-envelope-open-text" style="font-size: 2.5rem; color: var(--primary); margin-bottom: 15px;"></i>
+                <h3>Stay Updated</h3>
+                <p style="color: var(--text-muted); margin-bottom: 20px;">Subscribe for IELTS tips, scholarships & visa news.</p>
+                <form id="newsletterForm">
+                    <input type="email" placeholder="Enter your email" required>
+                    <button type="submit" class="btn-red" style="width: 100%;">Subscribe</button>
+                    <div id="newsletterMsg" style="margin-top: 10px;"></div>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <!-- ========== PAGE 2: ABOUT US ========== -->
+    <main id="about" class="page">
+        <section style="text-align: center;">
+            <span class="tag-red">Our Journey</span>
+            <h1 style="font-size: 4rem;">Providing Excellence <span>Since 2015</span></h1>
+        </section>
+        <section class="reveal" style="display: flex; align-items: center; gap: 50px; background: #000; color: #fff; border-radius: 40px; margin: 0 4%;">
+            <div style="flex: 1; padding: 60px;">
+                <h2>Our Story</h2>
+                <p>Founded in 2015, Education Next started with a mission to help students access quality global education. We take pride in our 98% visa success rate.</p>
+            </div>
+            <div style="flex: 1;"><img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=800" style="width: 100%; border-radius: 0 40px 40px 0;"></div>
+        </section>
+        <section class="reveal" style="margin-top: 60px;">
+            <div style="text-align: center; margin-bottom: 40px;"><h2>Our <span>Timeline</span></h2></div>
+            <div class="timeline">
+                <div class="timeline-item"><h4>2015</h4><p>Founded with 2 counselors and 10 students.</p></div>
+                <div class="timeline-item"><h4>2018</h4><p>Expanded to 3 city offices.</p></div>
+                <div class="timeline-item"><h4>2020</h4><p>Launched AI‑based mock test platform.</p></div>
+                <div class="timeline-item"><h4>2023</h4><p>Reached 5000 students placed globally.</p></div>
+            </div>
+        </section>
+        <section class="reveal" style="margin-top: 60px;">
+            <div style="text-align: center; margin-bottom: 40px;"><h2>Why <span>Choose Us</span></h2></div>
+            <div class="grid-2">
+                <div class="card" style="display: flex; gap: 20px;"><i class="fas fa-check-circle" style="font-size: 2rem; color: var(--primary);"></i><div><h4>Certified Trainers</h4><p>British Council certified.</p></div></div>
+                <div class="card" style="display: flex; gap: 20px;"><i class="fas fa-check-circle" style="font-size: 2rem; color: var(--primary);"></i><div><h4>Personalized Plans</h4><p>Custom study schedule.</p></div></div>
+                <div class="card" style="display: flex; gap: 20px;"><i class="fas fa-check-circle" style="font-size: 2rem; color: var(--primary);"></i><div><h4>Free Demo Class</h4><p>Experience before you enroll.</p></div></div>
+                <div class="card" style="display: flex; gap: 20px;"><i class="fas fa-check-circle" style="font-size: 2rem; color: var(--primary);"></i><div><h4>Visa Support</h4><p>End‑to‑end visa filing.</p></div></div>
+            </div>
+        </section>
+        <section class="reveal" style="margin-top: 60px;">
+            <div style="text-align: center; margin-bottom: 40px;"><h2>Meet Our <span>Team</span></h2></div>
+            <div class="grid-3">
+                <div class="card" style="text-align: center;">
+                    <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=200" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover;">
+                    <h4>Ali Raza</h4><p style="color: var(--primary);">Head Counselor</p>
+                </div>
+                <div class="card" style="text-align: center;">
+                    <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover;">
+                    <h4>Fatima Khan</h4><p style="color: var(--primary);">IELTS Trainer</p>
+                </div>
+                <div class="card" style="text-align: center;">
+                    <img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=200" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover;">
+                    <h4>Zain Ahmed</h4><p style="color: var(--primary);">Visa Specialist</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ========== PAGE 3: COURSES ========== -->
+    <main id="courses" class="page">
+        <section style="text-align: center;">
+            <span class="tag-red">Our Programs</span>
+            <h1 style="font-size: 4rem;">Comprehensive <span>Preparation</span></h1>
+        </section>
+        <section class="grid-2 reveal">
+            <div class="card"><h3>Academic IELTS</h3><p>12-week intensive program</p><p class="stat-number" style="font-size:2rem;">Rs. 25,000</p><button class="btn-red" onclick="openModal()">Enroll</button></div>
+            <div class="card"><h3>General Training</h3><p>8-week program</p><p class="stat-number" style="font-size:2rem;">Rs. 18,000</p><button class="btn-red" onclick="openModal()">Enroll</button></div>
+            <div class="card"><h3>One-on-One</h3><p>Flexible schedule</p><p class="stat-number" style="font-size:2rem;">Rs. 3,000/session</p><button class="btn-red" onclick="openModal()">Book Session</button></div>
+            <div class="card"><h3>Online Live</h3><p>Learn from anywhere</p><p class="stat-number" style="font-size:2rem;">Rs. 15,000</p><button class="btn-red" onclick="openModal()">Join Online</button></div>
+        </section>
+    </main>
+
+    <!-- ========== PAGE 4: MOCK TESTS (AI INTEGRATED) ========== -->
+    <main id="mock" class="page">
+        <div class="mock-hero">
+            <span class="tag-red" style="background: white;">AI Testing Hub</span>
+            <h1 style="font-size: 3.5rem;">IELTS / PTE AI Diagnostic</h1>
+            <p>Get graded by AI in under 60 seconds with 98% accuracy.</p>
+        </div>
+
+        <section class="grid-3 reveal">
+            <!-- Full Mock Test (placeholder) -->
+            <div class="card">
+                <span class="graded-badge">⚡ Graded in 1 min</span>
+                <i class="fas fa-file-alt" style="font-size: 3rem; color: var(--primary); margin-bottom: 20px; display: block;"></i>
+                <h3>Full Mock Test</h3>
+                <p>Simulate the real exam environment with all 4 sections.</p>
+                <button class="btn-red" style="width: 100%; margin-top: 20px;">Start Full Test</button>
+            </div>
+            <!-- Speaking AI (placeholder) -->
+            <div class="card">
+                <i class="fas fa-microphone" style="font-size: 3rem; color: var(--primary); margin-bottom: 20px; display: block;"></i>
+                <h3>Speaking AI</h3>
+                <p>Real-time voice analysis and fluency scoring.</p>
+                <button class="btn-red" style="width: 100%; margin-top: 20px;">Start Practice</button>
+            </div>
+            <!-- Writing AI (LIVE AI integration) -->
+            <div class="card" style="display: flex; flex-direction: column;">
+                <i class="fas fa-pen" style="font-size: 3rem; color: var(--primary); margin-bottom: 20px; display: block;"></i>
+                <h3>AI Writing Evaluation</h3>
+                <p>Paste your essay (Task 2) and get an instant band score + feedback.</p>
+                <textarea id="essayInput" rows="6" placeholder="Type your IELTS Writing Task 2 essay here..." style="resize: vertical; margin-top: 10px;"></textarea>
+                <button class="btn-red" style="margin-top: 15px;" id="getAIScoreBtn">Get AI Score</button>
+                <div id="aiResult" style="margin-top: 20px; display: none;">
+                    <div class="score-badge" id="bandScore"></div>
+                    <p id="aiFeedback" style="color: var(--text-muted); margin-top: 10px;"></p>
+                </div>
+                <div id="aiSpinner" style="text-align: center; margin-top: 15px; display: none;">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--primary);"></i>
+                    <p>Analyzing your essay...</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ========== PAGE 5: CONTACT ========== -->
+    <main id="contact" class="page">
+        <section style="text-align: center;">
+            <span class="tag-red">Get In Touch</span>
+            <h1 style="font-size: 4rem;">We're Here <span>to Help</span></h1>
+        </section>
+        <section class="grid-2 reveal">
+            <div class="card">
+                <h3>Send a Message</h3>
+                <form id="contactForm">
+                    <input type="text" id="cName" placeholder="Your Name" required>
+                    <input type="email" id="cEmail" placeholder="Your Email" required>
+                    <input type="tel" id="cPhone" placeholder="Phone Number">
+                    <textarea id="cMessage" rows="4" placeholder="Tell us more..."></textarea>
+                    <button type="submit" class="btn-red" style="width: 100%;">Send Message</button>
+                    <div id="contactMsg" style="margin-top: 10px;"></div>
+                </form>
+            </div>
+            <div>
+                <div class="card" style="margin-bottom: 20px;">
+                    <h3>Contact Info</h3>
+                    <p><i class="fas fa-map-marker-alt" style="color: var(--primary);"></i> 123 Education Street, Lahore</p>
+                    <p><i class="fas fa-phone" style="color: var(--primary);"></i> +92 300 1234567</p>
+                    <p><i class="fas fa-envelope" style="color: var(--primary);"></i> info@educationnext.pk</p>
+                </div>
+                <div style="border-radius: 30px; overflow: hidden; border: 1px solid var(--border);">
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3399.5583646324085!2d74.350000!3d31.520000!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39190483e58107f5%3A0x141da65e8c3b1b42!2sLahore%2C+Pakistan!5e0!3m2!1sen!2s!4v1633070000000" width="100%" height="300" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ========== PAGE 6: ADMIN PANEL ========== -->
+    <main id="admin" class="page">
+        <section>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 40px;">
+                <h2>Admin <span>Dashboard</span></h2>
+                <button class="btn-red" onclick="showPage('home')">View Site</button>
+            </div>
+            <div class="admin-box" style="margin-bottom: 40px;">
+                <h3>Update Landing Video</h3>
+                <input type="text" id="videoUrl" placeholder="Enter YouTube Embed URL">
+                <button class="btn-red" onclick="saveVideo()">Update Video</button>
+            </div>
+            <div class="admin-box">
+                <h3>Student Leads</h3>
+                <table><thead><tr><th>Name</th><th>Phone</th><th>Target</th><th>Date</th></tr></thead><tbody id="leadData"></tbody></table>
+            </div>
+            <div class="admin-box" style="margin-top: 30px;">
+                <h3>Contact Messages</h3>
+                <table><thead><tr><th>Name</th><th>Email</th><th>Message</th><th>Date</th></tr></thead><tbody id="contactLeadData"></tbody></table>
+            </div>
+        </section>
+    </main>
+
+    <!-- ENROLL MODAL -->
+    <div class="modal" id="enrollModal">
+        <div class="modal-content">
+            <h2>Reserve Your Spot</h2>
+            <form id="enrollForm">
+                <input type="text" id="stuName" placeholder="Full Name" required>
+                <input type="tel" id="stuPhone" placeholder="Phone Number" required>
+                <select id="stuBand">
+                    <option>Target Band 7.0</option>
+                    <option>Target Band 8.0</option>
+                    <option>Target Band 8.5+</option>
+                </select>
+                <button type="submit" class="btn-red" style="width: 100%;">Enroll Now</button>
+                <button type="button" onclick="closeModal()" style="background: none; color: gray; margin-top: 15px; width: 100%;">Cancel</button>
+            </form>
+        </div>
     </div>
 
     <footer>
-        <p>IELTS Academy © 2024. Project ID: pfmyuysdbauhtpbrvlvz</p>
+        <div class="grid-3" style="text-align: left; margin-bottom: 40px;">
+            <div>
+                <h3 style="color: var(--primary);">Education Next</h3>
+                <p>Transforming dreams into reality with expert consultancy and AI-powered preparation.</p>
+            </div>
+            <div>
+                <h4>Quick Links</h4>
+                <ul style="list-style: none; padding: 0;">
+                    <li><a onclick="showPage('home')">Home</a></li>
+                    <li><a onclick="showPage('about')">About Us</a></li>
+                    <li><a onclick="showPage('courses')">Courses</a></li>
+                    <li><a onclick="showPage('contact')">Contact</a></li>
+                    <li><a onclick="showPage('mock')">Mock Tests</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4>Contact Info</h4>
+                <p><i class="fas fa-map-marker-alt"></i> 123 Education Street, Lahore</p>
+                <p><i class="fas fa-phone"></i> +92 300 1234567</p>
+                <p><i class="fas fa-envelope"></i> info@educationnext.pk</p>
+            </div>
+        </div>
+        <div style="text-align: center; padding-top: 20px; border-top: 1px solid #222;">
+            <p style="font-size: 0.8rem; color: #555;">© <span id="currentYear"></span> Education Next Consultancy.</p>
+        </div>
     </footer>
 
     <script>
+        // Supabase Initialization
         const SB_URL = 'https://pfmyuysdbauhtpbrvlvz.supabase.co';
         const SB_KEY = 'sb_publishable_dlYhnXIglaIPbf-X47deZg_NKfqs56Y';
         const _supabase = supabase.createClient(SB_URL, SB_KEY);
 
+        // SPA Page Routing
         function showPage(pageId) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(pageId).classList.add('active');
-            window.scrollTo(0,0);
+            const page = document.getElementById(pageId);
+            if (page) {
+                page.classList.add('active');
+                window.scrollTo(0, 0);
+                initReveal();
+            }
         }
 
-        function loginAdmin() {
-            if(prompt("Admin Password:") === "admin123") { showPage('admin-page'); fetchStudents(); }
-            else { alert("Wrong password!"); }
+        // Admin Auth
+        function showAdmin() {
+            if(prompt("Admin Password:") === "admin123") {
+                showPage('admin');
+                fetchLeads();
+                fetchContactLeads();
+            }
         }
 
-        document.getElementById('studentForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const { error } = await _supabase.from('students').insert([{ 
-                name: document.getElementById('name').value, 
-                email: document.getElementById('email').value, 
-                target_band: document.getElementById('band').value 
-            }]);
-            if(error) alert("Error: " + error.message);
-            else { 
-                document.getElementById('studentForm').reset();
-                document.getElementById('success').style.display = 'block';
+        // Theme Toggle
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme');
+            const target = current === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', target);
+            document.querySelector('.theme-toggle i').className = target === 'light' ? 'fas fa-moon' : 'fas fa-sun';
+        }
+
+        // Modal Logic
+        function openModal() { document.getElementById('enrollModal').style.display = 'flex'; }
+        function closeModal() { document.getElementById('enrollModal').style.display = 'none'; }
+
+        // Video Update
+        function saveVideo() {
+            const url = document.getElementById('videoUrl').value;
+            if(url) {
+                localStorage.setItem('educationNextVideo', url);
+                const videoIframe = document.getElementById('landingVideo');
+                if(videoIframe) videoIframe.src = url;
+                alert("Video updated!");
+            }
+        }
+
+        // Load saved video
+        window.onload = () => {
+            const saved = localStorage.getItem('educationNextVideo');
+            if(saved) {
+                const videoIframe = document.getElementById('landingVideo');
+                if(videoIframe) videoIframe.src = saved;
+            }
+            initReveal();
+            document.getElementById('currentYear').textContent = new Date().getFullYear();
+            startCounters();
+        };
+
+        // Scroll Animations
+        function initReveal() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) entry.target.classList.add('active');
+                });
+            }, { threshold: 0.1 });
+            document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+        }
+
+        // Counter Animation
+        function startCounters() {
+            document.querySelectorAll('.counter').forEach(counter => {
+                const target = +counter.getAttribute('data-target');
+                const step = target / 125;
+                let current = 0;
+                const update = () => {
+                    current += step;
+                    if (current < target) {
+                        counter.textContent = Math.floor(current);
+                        requestAnimationFrame(update);
+                    } else counter.textContent = target;
+                };
+                update();
+            });
+        }
+
+        // FAQ Toggle
+        function toggleFAQ(element) {
+            element.parentElement.classList.toggle('open');
+        }
+
+        // ---------------- AI WRITING EVALUATOR ----------------
+        const ESSAY_FUNCTION_URL = 'https://pfmyuysdbauhtpbrvlvz.supabase.co/functions/v1/ai-ielts-writing';
+
+        document.getElementById('getAIScoreBtn').addEventListener('click', async () => {
+            const essay = document.getElementById('essayInput').value.trim();
+            if (!essay) return alert("Please paste your essay first.");
+
+            const resultDiv = document.getElementById('aiResult');
+            const spinner = document.getElementById('aiSpinner');
+            const bandSpan = document.getElementById('bandScore');
+            const feedbackP = document.getElementById('aiFeedback');
+
+            // Show spinner
+            resultDiv.style.display = 'none';
+            spinner.style.display = 'block';
+
+            try {
+                const response = await fetch(ESSAY_FUNCTION_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ essay })
+                });
+                const data = await response.json();
+                if (data.band) {
+                    bandSpan.textContent = `Band ${data.band}`;
+                    feedbackP.textContent = data.feedback;
+                    resultDiv.style.display = 'block';
+                } else {
+                    alert("AI evaluation failed. Please try again.");
+                }
+            } catch (err) {
+                alert("Network error. Check your connection or Edge Function status.");
+            } finally {
+                spinner.style.display = 'none';
             }
         });
 
-        async function fetchStudents() {
-            const { data, error } = await _supabase.from('students').select('*').order('id', { ascending: false });
-            const body = document.getElementById('dataTable');
-            body.innerHTML = '';
-            if(!error) data.forEach(s => {
-                body.innerHTML += `<tr><td style="padding:10px; border:1px solid #ddd;">${s.name}</td><td style="padding:10px; border:1px solid #ddd;">${s.email}</td><td style="padding:10px; border:1px solid #ddd;">${s.target_band}</td></tr>`;
-            });
+        // Supabase Enrollment
+        document.getElementById('enrollForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const { error } = await _supabase.from('students').insert([{
+                name: document.getElementById('stuName').value,
+                phone: document.getElementById('stuPhone').value,
+                target_band: document.getElementById('stuBand').value
+            }]);
+            if(!error) { alert("Registration Success!"); closeModal(); }
+        });
+
+        async function fetchLeads() {
+            const { data } = await _supabase.from('students').select('*').order('id', { ascending: false });
+            const body = document.getElementById('leadData');
+            if (body) {
+                body.innerHTML = '';
+                if (data) data.forEach(l => body.innerHTML += `<tr><td>${l.name}</td><td>${l.phone}</td><td>${l.target_band}</td><td>${new Date(l.created_at).toLocaleDateString()}</td></tr>`);
+            }
         }
+
+        document.getElementById('contactForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const { error } = await _supabase.from('contacts').insert([
+                { name: document.getElementById('cName').value, email: document.getElementById('cEmail').value, phone: document.getElementById('cPhone').value, message: document.getElementById('cMessage').value }
+            ]);
+            const msgDiv = document.getElementById('contactMsg');
+            msgDiv.innerHTML = error ? '<div style="color:red;">Error</div>' : '<div style="color:green;">Message sent!</div>';
+            setTimeout(() => msgDiv.innerHTML = '', 3000);
+        });
+
+        async function fetchContactLeads() {
+            const { data } = await _supabase.from('contacts').select('*').order('id', { ascending: false });
+            const body = document.getElementById('contactLeadData');
+            if (body) {
+                body.innerHTML = '';
+                if (data) data.forEach(l => body.innerHTML += `<tr><td>${l.name}</td><td>${l.email}</td><td>${l.message || ''}</td><td>${new Date(l.created_at).toLocaleDateString()}</td></tr>`);
+            }
+        }
+
+        document.getElementById('newsletterForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = e.target.querySelector('input[type="email"]').value;
+            const msgDiv = document.getElementById('newsletterMsg');
+            const { error } = await _supabase.from('newsletter').insert([{ email }]);
+            msgDiv.innerHTML = error ? '<div style="color:orange;">Already subscribed.</div>' : '<div style="color:green;">Subscribed!</div>';
+            setTimeout(() => msgDiv.innerHTML = '', 3000);
+        });
     </script>
 </body>
 </html>
