@@ -612,39 +612,7 @@
         // ---------------- AI WRITING EVALUATOR ----------------
         const ESSAY_FUNCTION_URL = 'https://pfmyuysdbauhtpbrvlvz.supabase.co/functions/v1/bright-worker';
 
-        document.getElementById('getAIScoreBtn').addEventListener('click', async () => {
-            const essay = document.getElementById('essayInput').value.trim();
-            if (!essay) return alert("Please paste your essay first.");
-
-            const resultDiv = document.getElementById('aiResult');
-            const spinner = document.getElementById('aiSpinner');
-            const bandSpan = document.getElementById('bandScore');
-            const feedbackP = document.getElementById('aiFeedback');
-
-            // Show spinner
-            resultDiv.style.display = 'none';
-            spinner.style.display = 'block';
-
-            try {
-                const response = await fetch(ESSAY_FUNCTION_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ essay })
-                });
-                const data = await response.json();
-                if (data.band) {
-                    bandSpan.textContent = `Band ${data.band}`;
-                    feedbackP.textContent = data.feedback;
-                    resultDiv.style.display = 'block';
-                } else {
-                    alert("AI evaluation failed. Please try again.");
-                }
-            } catch (err) {
-                alert("Network error. Check your connection or Edge Function status.");
-            } finally {
-                spinner.style.display = 'none';
-            }
-        });
+       document.getElementById('getAIScoreBtn'
 
         // Supabase Enrollment
         document.getElementById('enrollForm').addEventListener('submit', async (e) => {
